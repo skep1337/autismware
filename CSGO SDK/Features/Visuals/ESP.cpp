@@ -461,6 +461,10 @@ void CEsp::Keybinds() {
 		AddBind(XorStr("Fake walk"), g_Vars.misc.slow_walk_bind);
 	}
 
+	if (g_Vars.misc.move_exploit) {
+		AddBind(XorStr("Exploit walk"), g_Vars.misc.move_exploit_key);
+	}
+
 	float gaySize = this->m_KeyBinds.size.y;
 
 	static float alpha = 0.f;

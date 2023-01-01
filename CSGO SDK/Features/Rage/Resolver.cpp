@@ -372,11 +372,8 @@ namespace Engine {
 		if (!local)
 			return;
 
-		if (!(local->m_fFlags() & FL_ONGROUND))
-			return;
-
 		// nah
-		if (local->IsDead() || record->m_bFakeFlicking)
+		if (local->IsDead())
 		{
 			Engine::g_ResolverData[player->EntIndex()].m_bPredictingUpdates = false;
 			Engine::g_ResolverData[player->EntIndex()].m_bCollectedValidMoveData = false;
@@ -396,11 +393,16 @@ namespace Engine {
 		if (anim_data->m_AnimationRecord.size() < 2)
 			return;
 
+		if (!(player->m_fFlags() & FL_ONGROUND) || record->m_bFakeFlicking) {
+			Engine::g_ResolverData[player->EntIndex()].m_bPredictingUpdates = false;
+			return;
+		}
+
 		C_AnimationLayer* current_layer = &player->m_AnimOverlay()[3];
 		C_AnimationLayer* previous_layer = &prev->m_serverAnimOverlays[3];
 
 		// check if the player is walking
-		if (record->m_vecVelocity.Length() > 0.1f) {
+		if (record->m_vecVelocity.Length() >= 0.1f) {
 			// predict the first flick they have to do after they stop moving
 			Engine::g_ResolverData[player->EntIndex()].m_flNextBodyUpdate = player->m_flAnimationTime() + 0.22f;
 			Engine::g_ResolverData[player->EntIndex()].m_bPredictingUpdates = false;
@@ -408,7 +410,7 @@ namespace Engine {
 		}
 
 		// not breaking lby
-		if (record->m_vecVelocity.Length() < 0.1f && current_layer->m_flCycle > 0.987f && previous_layer->m_flCycle > 0.987f && current_layer->m_flWeight < 0.01f && previous_layer->m_flWeight < 0.01f && !(player->GetSequenceActivity(current_layer->m_nSequence) == 979))
+		if (current_layer->m_flCycle > 0.987f && previous_layer->m_flCycle > 0.987f && current_layer->m_flWeight < 0.01f && previous_layer->m_flWeight < 0.01f && !(player->GetSequenceActivity(current_layer->m_nSequence) == 979))
 		{
 			record->m_iResolverMode = EResolverModes::RESOLVE_LBY;
 			record->m_resolver_mode = XorStr("LBY");
@@ -496,16 +498,5 @@ namespace Engine {
 			record->m_angEyeAngles.y = player->m_angEyeAngles().y = player->m_flLowerBodyYawTarget();
 		else
 			record->m_angEyeAngles.y = player->m_angEyeAngles().y = angAway.y + 180.f;
-	}
-
-	void CResolver::ResolvePoses(C_CSPlayer* player, C_AnimationRecord* record)
-	{
-		if (record->m_iResolverMode == EResolverModes::RESOLVE_AIR) {
-			// lean_yaw
-			player->m_flPoseParameter()[2] = RandomInt(0, 4) * 0.25f;
-
-			// body_yaw
-			player->m_flPoseParameter()[11] = RandomInt(1, 3) * 0.25f;
-		}
 	}
 }

@@ -533,10 +533,6 @@ namespace Engine
 				return false;
 			};
 
-			// pasting supremacy
-			if (!IsPlayerBot())
-				g_Resolver.ResolvePoses(player, current.Xor());
-
 			// show teammate lby
 			if (player->IsTeammate(player) && !IsPlayerBot())
 				player->m_angEyeAngles().y = player->m_flLowerBodyYawTarget();
