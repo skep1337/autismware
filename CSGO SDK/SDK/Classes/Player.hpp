@@ -48,6 +48,7 @@ public:
    int& m_fFlags( );
    int& m_iDefaultFOV( );
    int& m_iObserverMode( );
+   bool& m_bSpotted();
 
    CPlayerState& pl( );
    CBaseHandle& m_hObserverTarget( );

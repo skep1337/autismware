@@ -1454,27 +1454,16 @@ namespace Interfaces
 								std::string resolvermode;
 								int resolver_mode = bestPoint->target->record->m_iResolverMode;
 
-								switch (resolver_mode) {
-								case 0:
-									resolvermode = XorStr("no fake"); break;
-								case 1:
-									resolvermode = XorStr("moving"); break;
-								case 2:
-									resolvermode = XorStr("brute"); break;
-								case 3:
-									resolvermode = XorStr("freestand"); break;
-								case 4:
-									resolvermode = XorStr("last move"); break;
-								case 5:
-									resolvermode = XorStr("brute"); break;
-								case 6:
-									resolvermode = XorStr("air"); break;
-								case 7:
-									resolvermode = XorStr("flick"); break;
-								case 8:
-									resolvermode = XorStr("lby"); break;
-								//case 9:
-									//resolvermode = XorStr("override"); break;
+								switch (resolver_mode) 
+								{
+								case 0: resolvermode = XorStr("no fake"); break;
+								case 1: resolvermode = XorStr("moving"); break;
+								case 2: resolvermode = XorStr("freestand"); break;
+								case 3: resolvermode = XorStr("last move"); break;
+								case 4: resolvermode = XorStr("brute"); break;
+								case 5: resolvermode = XorStr("air"); break;
+								case 6: resolvermode = XorStr("flick"); break;
+								case 7: resolvermode = XorStr("lby"); break;
 
 								default:
 									break;

@@ -86,10 +86,6 @@ float Autowall::ScaleDamage(C_CSPlayer* player, float flDamage, float flArmorRat
 
 	const float flArmorValue = static_cast<float>(player->m_ArmorValue());
 
-	/*
-	if( bHasHeavyArmor )
-		flHeadDamageScale *= 0.5f;*/
-
 	if (!bIsZeus) {
 		switch (nHitgroup) {
 		case Hitgroup_Head:
@@ -113,26 +109,30 @@ float Autowall::ScaleDamage(C_CSPlayer* player, float flDamage, float flArmorRat
 		}
 	}
 
-	// enemy have armor
 	if (bIsArmored) {
-		float flArmorScale = 1.0f;
-		float flArmorRatioCalculated = flArmorRatio * 0.5f;
+		float flArmorScale = 1.f;
 		float flArmorBonusRatio = 0.5f;
+		float flArmorRatioCalculated = flArmorRatio * 0.5f;
+		float fDamageToHealth = 0.f;
 
 		if (bHasHeavyArmor) {
-			flArmorRatioCalculated *= 0.2f;
+			flArmorRatioCalculated = flArmorRatio * 0.25f;
 			flArmorBonusRatio = 0.33f;
-			flArmorScale = 0.25f;
+			flArmorScale = 0.33f;
+
+			fDamageToHealth = (flDamage * flArmorRatioCalculated) * 0.85f;
+		}
+		else {
+			fDamageToHealth = flDamage * flArmorRatioCalculated;
 		}
 
-		auto flNewDamage = flDamage * flArmorRatioCalculated;
-		auto FlEstimatedDamage = (flDamage - flDamage * flArmorRatioCalculated) * flArmorScale * flArmorBonusRatio;
+		float fDamageToArmor = (flDamage - fDamageToHealth) * (flArmorScale * flArmorBonusRatio);
 
 		// Does this use more armor than we have?
-		if (FlEstimatedDamage > flArmorValue)
-			flNewDamage = flDamage - flArmorValue / flArmorBonusRatio;
+		if (fDamageToArmor > flArmorValue)
+			fDamageToHealth = flDamage - (flArmorValue / flArmorBonusRatio);
 
-		flDamage = flNewDamage;
+		flDamage = fDamageToHealth;
 	}
 
 	return std::floor(flDamage);
@@ -142,6 +142,26 @@ void Autowall::TraceLine(const Vector& start, const Vector& end, uint32_t mask, 
 	Ray_t ray;
 	ray.Init(start, end);
 	Interfaces::m_pEngineTrace->TraceRay(ray, mask, ignore, ptr);
+}
+
+void util_clip_trace_to_players(const Vector& vec_abs_start, const Vector& vec_abs_end, unsigned int mask, ITraceFilter* filter, CGameTrace* tr)
+{
+	uint32_t clip_trace_to_players = 0;
+
+	static auto dw_address = clip_trace_to_players;
+
+	_asm
+	{
+		mov		eax, filter
+		lea		ecx, tr
+		push	ecx
+		push	eax
+		push	mask
+		lea		edx, vec_abs_end
+		lea		ecx, vec_abs_start
+		call	dw_address
+		add		esp, 0xC
+	}
 }
 
 __forceinline float DistanceToRay(const Vector& vecPosition, const Vector& vecRayStart, const Vector& vecRayEnd, float* flAlong = NULL, Vector* vecPointOnRay = NULL) {
@@ -248,7 +268,10 @@ void Autowall::ClipTraceToPlayers(const Vector& vecAbsStart, const Vector& vecAb
 		// calculate distance to ray
 		const float flRange = DistanceToRay(vecPosition, vecAbsStart, vecAbsEnd);
 
-		if (flRange <= flMinRange || flRange >= flMaxRange)
+		//if( flRange <= flMinRange || flRange >= flMaxRange )
+		//	return;
+
+		if (flRange < flMinRange || flRange > flMaxRange)
 			return;
 
 		CGameTrace playerTrace;
@@ -399,7 +422,7 @@ bool Autowall::HandleBulletPenetration(Encrypted_t<C_FireBulletData> data) {
 
 		/*
 		if( bContentsGrate || bNoDrawSurf || iEnterMaterial == CHAR_TEX_GLASS || iEnterMaterial == CHAR_TEX_GRATE ) {
-
+			
 			if( iEnterMaterial == CHAR_TEX_GLASS || iEnterMaterial == CHAR_TEX_GRATE ) {
 				flPenetrationModifier = 3.0f;
 				flDamageModifier = 0.05f;
@@ -523,6 +546,7 @@ bool Autowall::HandleBulletPenetration(Encrypted_t<C_FireBulletData> data) {
 	}
 }
 
+
 __forceinline bool IsValidHitgroup(int index) {
 	if ((index >= Hitgroup_Head && index <= Hitgroup_RightLeg) || index == Hitgroup_Gear)
 		return true;
@@ -531,7 +555,7 @@ __forceinline bool IsValidHitgroup(int index) {
 }
 
 float Autowall::FireBullets(Encrypted_t<C_FireBulletData> data) {
-	constexpr float rayExtension = 0.5f;
+	constexpr float rayExtension = 40.f;
 
 	//This gets set in FX_Firebullets to 4 as a pass-through value.
 	//CS:GO has a maximum of 4 surfaces a bullet can pass-through before it 100% stops.
@@ -558,7 +582,7 @@ float Autowall::FireBullets(Encrypted_t<C_FireBulletData> data) {
 
 	g_Vars.globals.m_InHBP = true;
 
-	while (data->m_flCurrentDamage > 1.f) {
+	while (data->m_flCurrentDamage >= 1.f) {
 		// calculate max bullet range
 		data->m_flMaxLength -= data->m_flTraceLength;
 
@@ -581,21 +605,21 @@ float Autowall::FireBullets(Encrypted_t<C_FireBulletData> data) {
 		}
 
 		if (data->m_EnterTrace.fraction == 1.f)
-			break;  // we didn't hit anything, stop tracing shoot
+			break;  // we didn't hit anything, stop tracing and shoot
 
-		//calculate the damage based on the distance the bullet traveled.
+		// calculate the damage based on the distance the bullet traveled.
 		data->m_flTraceLength += data->m_EnterTrace.fraction * data->m_flMaxLength;
 
-		//Let's make our damage drops off the further away the bullet is.
+		// let's make our damage drop off the further away the bullet is.
 		if (!data->m_bShouldIgnoreDistance)
-			data->m_flCurrentDamage *= powf(data->m_WeaponData->m_flRangeModifier, data->m_flTraceLength * 0.002f);
+			data->m_flCurrentDamage *= powf(data->m_WeaponData->m_flRangeModifier, (data->m_flTraceLength * 0.002f));
 
 		C_CSPlayer* pHittedPlayer = ToCSPlayer((C_BasePlayer*)data->m_EnterTrace.hit_entity);
-
 
 		const int nHitGroup = data->m_EnterTrace.hitgroup;
 		const bool bHitgroupIsValid = data->m_Weapon->m_iItemDefinitionIndex() == WEAPON_ZEUS ? (nHitGroup >= Hitgroup_Generic && nHitGroup < Hitgroup_Neck) : IsValidHitgroup(nHitGroup);
 		const bool bTargetIsValid = !data->m_TargetPlayer || (pHittedPlayer != nullptr && pHittedPlayer->m_entIndex == data->m_TargetPlayer->m_entIndex);
+
 		if (pHittedPlayer != nullptr) {
 			if (bTargetIsValid && bHitgroupIsValid && pHittedPlayer->IsPlayer() && pHittedPlayer->m_entIndex <= Interfaces::m_pGlobalVars->maxClients && pHittedPlayer->m_entIndex > 0) {
 				data->m_flCurrentDamage = ScaleDamage(pHittedPlayer, data->m_flCurrentDamage, data->m_WeaponData->m_flArmorRatio, data->m_Weapon->m_iItemDefinitionIndex() == WEAPON_ZEUS ? Hitgroup_Generic : nHitGroup);
@@ -621,7 +645,7 @@ float Autowall::FireBullets(Encrypted_t<C_FireBulletData> data) {
 
 		// check if we reach penetration distance, no more penetrations after that
 		// or if our modifier is super low, just stop the bullet
-		if ((data->m_flTraceLength > 3000.f && data->m_WeaponData->m_flPenetration > 0.f) ||
+		if ((data->m_flTraceLength > 3000.f && data->m_WeaponData->m_flPenetration > 0.f) || 
 			data->m_EnterSurfaceData->game.flPenetrationModifier < 0.1f) {
 			data->m_iPenetrationCount = 0;
 			break;

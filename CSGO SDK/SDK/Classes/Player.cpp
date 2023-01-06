@@ -63,6 +63,10 @@ int& C_BasePlayer::m_iObserverMode( ) {
 	return *( int* )( ( uintptr_t )this + Engine::Displacement.DT_BasePlayer.m_iObserverMode );
 }
 
+bool& C_BasePlayer::m_bSpotted() {
+	return *(bool*)((uintptr_t)this + Engine::Displacement.DT_BasePlayer.m_bSpotted);
+}
+
 CPlayerState& C_BasePlayer::pl( ) {
 	return *( CPlayerState* )( ( uintptr_t )this + Engine::Displacement.DT_BasePlayer.pl );
 }

@@ -398,8 +398,6 @@ namespace Interfaces
 		if (m_movement_data->m_bStopPlayer < 0)
 			m_movement_data->m_bStopPlayer = 0;
 
-		Interfaces::AntiAimbot::Get()->PrePrediction(m_movement_data->m_pSendPacket, cmd);
-
 		m_movement_data->m_pCmd->viewangles.Normalize();
 
 		RotateMovement(m_movement_data->m_pCmd, m_movement_data->m_angMovementAngle, m_movement_data->m_pCmd->viewangles);
@@ -747,7 +745,7 @@ namespace Interfaces
 		if ((m_movement_data->m_pLocal->m_fFlags() & FL_ONGROUND) && !(m_movement_data->m_pCmd->buttons & IN_JUMP))
 			return;
 
-		if (m_movement_data->m_pLocal->m_MoveType() != MOVETYPE_WALK)
+		if (m_movement_data->m_pLocal->m_MoveType() != MOVETYPE_WALK || m_movement_data->m_pLocal->m_MoveType() == MOVETYPE_NOCLIP || m_movement_data->m_pLocal->m_MoveType() == MOVETYPE_LADDER)
 			return;
 
 		if (g_Vars.misc.slow_walk && g_Vars.misc.slow_walk_bind.enabled)

@@ -385,6 +385,7 @@ public:
 		bool bInRagebot = false;
 		QAngle PreviousViewangles;
 		QAngle RegularAngles;
+		QAngle FakeAngle;
 		float YawDelta = 0.0f;
 		bool ResetWeapon = false;
 		float LastVelocityModifier = 0.0f;
@@ -826,6 +827,7 @@ public:
 	config_option(bool, distort_lby_update, false);
 
 	config_option(bool, freestand, false);
+	config_option(bool, draw_angles, false);
 	config_option(bool, freestand_invert, false);
 	config_option(bool, freestand_lock, false);
 	config_option(bool, freestand_disable_fakewalk, false);

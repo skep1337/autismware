@@ -106,6 +106,7 @@ struct DllInitializeData {
 	  DWORD32 m_iHealth;
 	  DWORD32 m_iDefaultFOV;
 	  DWORD32 m_fFlags;
+	  DWORD32 m_bSpotted;
 	  DWORD32 pl;
 	  DWORD32 m_hObserverTarget;
 	  DWORD32 m_hViewModel;

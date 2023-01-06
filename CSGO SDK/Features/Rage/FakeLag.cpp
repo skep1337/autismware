@@ -508,9 +508,6 @@ namespace Interfaces
 			if (g_Vars.fakelag.trigger_duck && local->m_flDuckAmount() > 0.0f && g_Vars.globals.m_flPreviousDuckAmount > local->m_flDuckAmount()) {
 				fakelagData->m_bAlternative = true;
 			}
-			else if (g_Vars.fakelag.trigger_weapon_activity && (local->m_flNextAttack() == Interfaces::m_pGlobalVars->curtime)) {
-				fakelagData->m_bAlternative = true;
-			}
 			else if (g_Vars.fakelag.trigger_reloading && local->IsReloading()) {
 				fakelagData->m_bAlternative = true;
 			}
@@ -521,10 +518,6 @@ namespace Interfaces
 				fakelagData->m_bAlternative = true;
 			}
 			else if (g_Vars.fakelag.trigger_on_peek && Interfaces::FakeLag::Get()->IsPeeking(cmd)) {
-				fakelagData->m_bAlternative = true;
-			}
-
-			else if (g_Vars.fakelag.trigger_shooting && cmd->buttons & IN_ATTACK) {
 				fakelagData->m_bAlternative = true;
 			}
 
@@ -567,6 +560,10 @@ namespace Interfaces
 			fakelagData->m_iMaxChoke = 14;
 		else
 			fakelagData->m_iMaxChoke = !moving ? 1 : (int)g_Vars.fakelag.choke;
+
+		// garbage event delay fix that doesn't require me to fix prediction
+		if (cmd->buttons & IN_ATTACK || local->m_flNextAttack() == Interfaces::m_pGlobalVars->curtime)
+			fakelagData->m_iMaxChoke = 2;
 
 		return true;
 	}

@@ -258,28 +258,25 @@ namespace Hooked
 			g_Vars.globals.m_flBodyPred = g_Vars.globals.m_flAnimTime + 1.1f;
 		}
 
-
-
 		// build bones at the end of everything
-		{
-			g_BoneSetup.BuildBones(local, BONE_USED_BY_ANYTHING, BoneSetupFlags::None);
 
-			g_Vars.globals.flRealYaw = state->m_flAbsRotation;
-			g_Vars.globals.angViewangles = cmd->viewangles;
+		g_BoneSetup.BuildBones(local, BONE_USED_BY_ANYTHING, BoneSetupFlags::None);
 
-			// copy real bone positions
-			auto boneCount = local->m_CachedBoneData().Count();
-			std::memcpy(g_Vars.globals.m_RealBonesPositions, local->m_vecBonePos(), boneCount * sizeof(Vector));
-			std::memcpy(g_Vars.globals.m_RealBonesRotations, local->m_quatBoneRot(), boneCount * sizeof(Quaternion));
+		g_Vars.globals.flRealYaw = state->m_flAbsRotation;
+		g_Vars.globals.angViewangles = cmd->viewangles;
 
-			local->m_AnimOverlay().Element(12).m_flWeight = flWeight12Backup;
-			if (g_Vars.globals.m_flPoseParams) {
-				std::memcpy(local->m_flPoseParameter(), g_Vars.globals.m_flPoseParams, sizeof(local->m_flPoseParameter()));
-			}
+		// copy real bone positions
+		auto boneCount = local->m_CachedBoneData().Count();
+		std::memcpy(g_Vars.globals.m_RealBonesPositions, local->m_vecBonePos(), boneCount * sizeof(Vector));
+		std::memcpy(g_Vars.globals.m_RealBonesRotations, local->m_quatBoneRot(), boneCount * sizeof(Quaternion));
 
-			if (local->m_CachedBoneData().Base() != local->m_BoneAccessor().m_pBones) {
-				std::memcpy(local->m_BoneAccessor().m_pBones, local->m_CachedBoneData().Base(), local->m_CachedBoneData().Count() * sizeof(matrix3x4_t));
-			}
+		local->m_AnimOverlay().Element(12).m_flWeight = flWeight12Backup;
+		if (g_Vars.globals.m_flPoseParams) {
+			std::memcpy(local->m_flPoseParameter(), g_Vars.globals.m_flPoseParams, sizeof(local->m_flPoseParameter()));
+		}
+
+		if (local->m_CachedBoneData().Base() != local->m_BoneAccessor().m_pBones) {
+			std::memcpy(local->m_BoneAccessor().m_pBones, local->m_CachedBoneData().Base(), local->m_CachedBoneData().Count() * sizeof(matrix3x4_t));
 		}
 
 		// save updated data.
@@ -506,9 +503,10 @@ namespace Hooked
 			g_Vars.globals.m_vecNetworkedOrigin = pLocal->m_vecOrigin();
 		}
 
-		if (!*bSendPacket || !*bFinalTick) {
+		if (!*bSendPacket || !*bFinalTick)
 			g_Vars.globals.RegularAngles = cmd->viewangles;
-		}
+		else
+			g_Vars.globals.FakeAngle = cmd->viewangles;
 
 		if (*bSendPacket) {
 			Vector cur = pLocal->m_vecOrigin();

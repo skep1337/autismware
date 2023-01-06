@@ -95,6 +95,7 @@ namespace Engine
 		Displacement.DT_BasePlayer.m_iHealth = pPropManager->GetOffset( XorStr( "DT_BasePlayer" ), XorStr( "m_iHealth" ) );
 		Displacement.DT_BasePlayer.m_iDefaultFOV = pPropManager->GetOffset( XorStr( "DT_BasePlayer" ), XorStr( "m_iDefaultFOV" ) );
 		Displacement.DT_BasePlayer.m_fFlags = pPropManager->GetOffset( XorStr( "DT_BasePlayer" ), XorStr( "m_fFlags" ) );
+		Displacement.DT_BasePlayer.m_bSpotted = pPropManager->GetOffset(XorStr("DT_BasePlayer"), XorStr("m_bSpotted"));
 		Displacement.DT_BasePlayer.m_iObserverMode = pPropManager->GetOffset( XorStr( "DT_BasePlayer" ), XorStr( "m_iObserverMode" ) );
 		Displacement.DT_BasePlayer.pl = pPropManager->GetOffset( XorStr( "DT_BasePlayer" ), XorStr( "pl" ) );
 		Displacement.DT_BasePlayer.m_hObserverTarget = pPropManager->GetOffset( XorStr( "DT_BasePlayer" ), XorStr( "m_hObserverTarget" ) );

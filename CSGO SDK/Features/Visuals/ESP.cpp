@@ -337,9 +337,42 @@ void CEsp::Indicators() {
 		struct Indicator_t { Color color; std::string text; };
 		std::vector< Indicator_t > indicators{ };
 
-
 		Color ff15c27b{ 124, 195, 13, 255 };
 		Color ff0000ff{ 255,0,0,255 };
+
+		if (g_Vars.antiaim.draw_angles)
+		{
+			const auto& pos = pLocal->GetAbsOrigin();
+			Vector2D tmp;
+
+			if (WorldToScreen(pos, tmp))
+			{
+				Vector2D draw_tmp;
+				const Vector real_pos(45.f * std::cos(DEG2RAD(g_Vars.globals.FakeAngle.y)) + pos.x, 45.f * sin(DEG2RAD(g_Vars.globals.FakeAngle.y)) + pos.y, pos.z);
+
+				if (WorldToScreen(real_pos, draw_tmp))
+				{
+					Render::Engine::Line(tmp.x, tmp.y, draw_tmp.x, draw_tmp.y, { 0, 255, 0, 255 });
+					Render::Engine::esp.string(draw_tmp.x, draw_tmp.y, { 0, 255, 0, 255 }, "FAKE", Render::Engine::ALIGN_LEFT);
+				}
+
+				const Vector fake_pos(45.f * cos(DEG2RAD(g_Vars.globals.RegularAngles.y)) + pos.x, 45.f * sin(DEG2RAD(g_Vars.globals.RegularAngles.y)) + pos.y, pos.z);
+
+				if (WorldToScreen(fake_pos, draw_tmp))
+				{
+					Render::Engine::Line(tmp.x, tmp.y, draw_tmp.x, draw_tmp.y, { 255, 0, 0, 255 });
+					Render::Engine::esp.string(draw_tmp.x, draw_tmp.y, { 255, 0, 0, 255 }, "REAL", Render::Engine::ALIGN_LEFT);
+				}
+
+				float lby = pLocal->m_flLowerBodyYawTarget();
+				const Vector lby_pos(45.f * cos(DEG2RAD(lby)) + pos.x, 45.f * sin(DEG2RAD(lby)) + pos.y, pos.z);
+				if (WorldToScreen(lby_pos, draw_tmp))
+				{
+					Render::Engine::Line(tmp.x, tmp.y, draw_tmp.x, draw_tmp.y, { 255, 255, 255, 255 });
+					Render::Engine::esp.string(draw_tmp.x, draw_tmp.y, { 255, 255, 255, 255 }, "LBY", Render::Engine::ALIGN_LEFT);
+				}
+			}
+		}
 
 		// LC
 		if (!(pLocal->m_fFlags() & FL_ONGROUND) && g_Vars.esp.indicator_breaklc) {

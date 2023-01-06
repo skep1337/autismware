@@ -229,7 +229,7 @@ namespace Hooked
 					continue;
 
 				player->SetAbsOrigin(player->m_vecOrigin());
-				*(bool*)(uintptr_t(player) + 0x93D) = g_Vars.misc.ingame_radar;
+				player->m_bSpotted() = g_Vars.misc.ingame_radar;
 			}
 		}
 

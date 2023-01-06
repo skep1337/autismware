@@ -8,14 +8,12 @@ namespace Engine {
 	enum EResolverModes : size_t {
 		RESOLVE_NONE = 0,
 		RESOLVE_WALK,
-		RESOLVE_STAND,
 		RESOLVE_FREESTAND,
 		RESOLVE_LAST_LBY,
 		RESOLVE_BRUTEFORCE,
 		RESOLVE_AIR,
 		RESOLVE_LBY_UPDATE,
 		RESOLVE_LBY,
-		RESOLVE_OVERRIDE,
 	};
 
 	struct CResolverData {
@@ -48,7 +46,6 @@ namespace Engine {
 
 	class CResolver {
 	private:
-		void ResolveAngles(C_CSPlayer* player, C_AnimationRecord* record);
 		void ResolveWalk(C_CSPlayer* player, C_AnimationRecord* record);
 		void ResolveStand(C_CSPlayer* player, C_AnimationRecord* record);
 		void ResolveAir(C_CSPlayer* player, C_AnimationRecord* record);

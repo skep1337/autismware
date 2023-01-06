@@ -20,7 +20,6 @@ namespace Interfaces
 	public:
 		void UpdateJitter();
 		void Main(bool* bSendPacket, bool* bFinalPacket, Encrypted_t<CUserCmd> cmd, bool ragebot) override;
-		void PrePrediction(bool* bSendPacket, Encrypted_t<CUserCmd> cmd) override;
 	private:
 		virtual float GetAntiAimX(Encrypted_t<CVariables::ANTIAIM_STATE> settings);
 		virtual float GetAntiAimY(Encrypted_t<CVariables::ANTIAIM_STATE> settings, Encrypted_t<CUserCmd> cmd);
@@ -217,6 +216,7 @@ namespace Interfaces
 		// https://github.com/VSES/SourceEngine2007/blob/master/se2007/engine/cl_main.cpp#L1877-L1881
 		if (!*bSendPacket || !*bFinalPacket) {
 			cmd->viewangles.y = flYaw;
+			Distort(cmd);
 		}
 		else {
 			std::uniform_int_distribution random(-90, 90);
@@ -224,24 +224,15 @@ namespace Interfaces
 			static int negative = false;
 
 			switch (settings->fake_yaw) {
-			case 1: // 180
-				cmd->viewangles.y = Math::AngleNormalize(flYaw + 180);
-				break;
 
-			case 2:
+				// default
+			case 1:
 				cmd->viewangles.y = Math::AngleNormalize(flYaw + 180 + random(generator));
 				break;
 
-				// rotate
-			case 3:
-				flYaw = Math::AngleNormalize(cmd->viewangles.y + 90 + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 180.f));
-				if (flYaw == 1.f)
-					flYaw = Math::AngleNormalize(cmd->viewangles.y + 180 + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 0.f));
-				break;
-
 				// flicker
-			case 4:
-				negative ? flYaw = Math::AngleNormalize(cmd->viewangles.y + 90 + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 180.f)) : cmd->viewangles.y = Math::AngleNormalize(cmd->viewangles.y - 90 + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 180.f));
+			case 2:
+				negative ? flYaw = Math::AngleNormalize(flYaw + 90 + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 180.f)) : cmd->viewangles.y = Math::AngleNormalize(flYaw + 90 + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 180.f));
 				if (flYaw == 1.f)
 					negative ? flYaw + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 0.f) : flYaw + std::fmod(Interfaces::m_pGlobalVars->curtime * 360.f, 0.f);
 				negative = !negative;
@@ -277,25 +268,6 @@ namespace Interfaces
 			default:
 				break;
 			}
-		}
-		Distort(cmd);
-	}
-
-	void C_AntiAimbot::PrePrediction(bool* bSendPacket, Encrypted_t<CUserCmd> cmd) {
-		if (!g_Vars.antiaim.enabled)
-			return;
-
-		C_CSPlayer* local = C_CSPlayer::GetLocalPlayer();
-		if (!local || local->IsDead())
-			return;
-
-		Encrypted_t<CVariables::ANTIAIM_STATE> settings(&g_Vars.antiaim_stand);
-
-		//g_Vars.globals.m_bInverted = g_Vars.antiaim.desync_flip_bind.enabled;
-
-		if (!IsEnabled(cmd, settings)) {
-			g_Vars.globals.RegularAngles = cmd->viewangles;
-			return;
 		}
 	}
 

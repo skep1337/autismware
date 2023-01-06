@@ -188,7 +188,7 @@ namespace Menu {
 						GUI::Controls::Slider(("Jitter amount"), &g_Vars.antiaim.random_jitter, -360, 360);
 					}
 
-					GUI::Controls::Dropdown(("Fake yaw"), { ("Off"), ("Static"), ("Default"), ("Rotate"), ("Flicker") }, & settings->fake_yaw);
+					GUI::Controls::Dropdown(("Fake yaw"), { ("Off"), ("Default"), ("Flicker") }, & settings->fake_yaw);
 					GUI::Controls::Dropdown(("Body yaw"), { ("Off"), ("Twist"), ("Static"), ("Break Logic") }, &settings->yaw);
 
 					if (settings->yaw > 0 && settings->yaw != 3) {
@@ -198,6 +198,9 @@ namespace Menu {
 					if (settings->base_yaw == 0) {}
 
 					GUI::Controls::Checkbox(("Freestanding"), &g_Vars.antiaim.freestand);
+
+					GUI::Controls::Checkbox(("Draw angles"), &g_Vars.antiaim.draw_angles);
+
 					if (GUI::Controls::Checkbox(("Manual"), &g_Vars.antiaim.manual) || GUI::ctx->setup) {
 						GUI::Controls::ColorPicker(("Manual color"), &g_Vars.antiaim.manual_color);
 						GUI::Controls::Label(("Left"));
@@ -242,7 +245,6 @@ namespace Menu {
 					std::vector<MultiItem_t> fakelag_cond = {
 						{ XorStr("Moving"), &g_Vars.fakelag.when_moving },
 						{ XorStr("In air"), &g_Vars.fakelag.when_air },
-						{ XorStr("On Shot"), &g_Vars.fakelag.trigger_shooting },
 						{ XorStr("On Peek"), &g_Vars.fakelag.trigger_on_peek },
 						{ XorStr("LBY Update"), &g_Vars.fakelag.lby_update },
 						{ XorStr("Break LC"), &g_Vars.fakelag.break_lag_compensation },

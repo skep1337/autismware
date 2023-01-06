@@ -544,7 +544,7 @@ int CSkinChanger::GetNewAnimation(const uint32_t model, const int sequence, C_Ba
 
 CVariables::skin_changer_data* CSkinChanger::GetDataFromIndex(int idx) {
 	auto& skin_data = g_Vars.m_skin_changer;
-	for (size_t i = 0u; i < skin_data.Size(); ++i) {
+	for (size_t i = 0; i < skin_data.Size(); ++i) {
 		auto skin = skin_data[i];
 		if (skin->m_definition_index == idx)
 			return skin;
